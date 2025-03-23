@@ -11,7 +11,7 @@ const MESSAGES = {
 
 function Title({ todos }) {
   return (
-    <h1>Todo App : {todos.length}</h1>
+    <h1>Todo List : {todos.length}</h1>
   )
 }
 
@@ -34,9 +34,13 @@ function TodoList({ todos, deleteTodo, toggleFinish }) {
     ));
 
   return todoItems.length === 0 ? (
-    <div>{MESSAGES.EMPTY_TODO}</div>
+    <div>
+      <Title todos={todoItems} />
+      {MESSAGES.EMPTY_TODO}
+      </div>
   ) : (
     <div>
+      <Title todos={todoItems} />
       <ol>{todoItems}</ol>
     </div>
   );
@@ -127,7 +131,6 @@ function App() {
 
   return (
     <>
-      <Title todos={todos} />
       <TodoList 
         deleteTodo={deleteTodo} 
         toggleFinish={toggleFinish} 
