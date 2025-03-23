@@ -73,7 +73,7 @@ function InputBox({ addTodo }) {
         type="text" 
         value={inputValue} 
         onChange={(e) => setInputValue(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+        onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
         className="flex-1 px-4 py-2 bg-gray-800 text-white border-2 border-gray-700 rounded-lg 
                    focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
         placeholder="添加新的待办事项..."
@@ -91,6 +91,8 @@ function InputBox({ addTodo }) {
 function FinishList({ todos }) {
   const finishedItems = todos
     .filter(todo => todo.isFinish)
+    .sort((a, b) => b.id - a.id)
+    .slice(0,5) //only keep latest 5 todos
     .map(todo => (
       <li key={todo.id}> 
         <span style={{ textDecoration: "line-through" }}>{todo.content}</span>
