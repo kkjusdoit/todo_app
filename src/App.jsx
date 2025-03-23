@@ -10,47 +10,51 @@ const MESSAGES = {
 };
 
 function Title({ todos }) {
+  const unfinishedTodos = todos.filter(todo => !todo.isFinish);
   return (
-    <h1>Todo List : {todos.length}</h1>
+    <h1 className="text-4xl font-bold text-white mb-8">
+      Todo List : {unfinishedTodos.length}
+    </h1>
   )
 }
 
-Title.propTypes = {
-  todos: PropTypes.array.isRequired
-};
-
 function TodoList({ todos, deleteTodo, toggleFinish }) {
   const todoItems = todos.filter(todo => !todo.isFinish)
-    .map(todo => (
-      <li key={todo.id}> 
-        <button onClick={() => deleteTodo(todo.id)}>
-          Delete
-        </button>
-        {todo.content} 
-        <button onClick={() => toggleFinish(todo.id)}>
-          Finish
-        </button>
+    .map((todo, index) => (
+      <li key={todo.id} className="bg-gray-800 px-4 py-2 rounded-lg shadow-sm hover:shadow-lg transition-all" style={{display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', width: '100%', gap: '8px'}}>
+        <span className="text-white">{index + 1}.</span>
+        <span className="text-white" style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{todo.content}</span>
+        <div style={{display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0}}>
+          <input
+            type="checkbox"
+            checked={todo.isFinish}
+            onChange={() => toggleFinish(todo.id)}
+            className="w-4 h-4 border-2 border-blue-500 rounded text-blue-500 focus:ring-blue-500 cursor-pointer bg-gray-700"
+          />
+          <button 
+            onClick={() => deleteTodo(todo.id)}
+            className="text-gray-400 hover:text-red-400 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
       </li>
     ));
 
   return todoItems.length === 0 ? (
-    <div>
-      <Title todos={todoItems} />
+    <div className="text-center text-gray-400 p-8 bg-gray-800 rounded-lg shadow-sm">
       {MESSAGES.EMPTY_TODO}
-      </div>
+    </div>
   ) : (
-    <div>
-      <Title todos={todoItems} />
-      <ol>{todoItems}</ol>
+    <div className="w-full max-w-2xl">
+      <ol className="space-y-2 list-none">{todoItems}</ol>
     </div>
   );
 }
-
-TodoList.propTypes = {
-  todos: PropTypes.array.isRequired,
-  deleteTodo: PropTypes.func.isRequired,
-  toggleFinish: PropTypes.func.isRequired
-};
 
 function InputBox({ addTodo }) {
   const [inputValue, setInputValue] = useState("");
@@ -65,23 +69,25 @@ function InputBox({ addTodo }) {
   };
 
   return (
-    <div>
+    <div className="flex gap-2 my-8 w-full">
       <input 
         type="text" 
         value={inputValue} 
         onChange={(e) => setInputValue(e.target.value)}
         onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+        className="flex-1 px-4 py-2 bg-gray-800 text-white border-2 border-gray-700 rounded-lg 
+                   focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        placeholder="添加新的待办事项..."
       />
-      <button onClick={handleSubmit}>
-        Confirm
+      <button 
+        onClick={handleSubmit}
+        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+      >
+        添加
       </button>
     </div>
   );
 }
-
-InputBox.propTypes = {
-  addTodo: PropTypes.func.isRequired
-};
 
 function FinishList({ todos }) {
   const finishedItems = todos
@@ -100,10 +106,6 @@ function FinishList({ todos }) {
     </div>
   );
 }
-
-FinishList.propTypes = {
-  todos: PropTypes.array.isRequired
-};
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -130,16 +132,19 @@ function App() {
   }, []);
 
   return (
-    <>
-      <TodoList 
-        deleteTodo={deleteTodo} 
-        toggleFinish={toggleFinish} 
-        todos={todos}
-      />
-      <InputBox addTodo={addTodo} />
-      <FinishList todos={todos} />
-      <p>By kkjusdoit</p>
-    </>
+    <div className="min-h-screen bg-gray-900 py-12 px-4">
+      <div className="container mx-auto max-w-3xl flex flex-col items-center">
+        <Title todos={todos} />
+        <TodoList 
+          deleteTodo={deleteTodo} 
+          toggleFinish={toggleFinish} 
+          todos={todos}
+        />
+        <InputBox addTodo={addTodo} />
+        <FinishList todos={todos} />
+        <p className="text-gray-500 mt-8">By kkjusdoit</p>
+      </div>
+    </div>
   );
 }
 
