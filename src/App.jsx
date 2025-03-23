@@ -112,7 +112,6 @@ function App() {
     const savedTodos = localStorage.getItem('todos');
     return savedTodos ? JSON.parse(savedTodos) : [];
   });
-  const [inputValue, setInputValue] = useState('');
 
   // 当 todos 变化时，保存到 localStorage
   useEffect(() => {
@@ -129,7 +128,6 @@ function App() {
     };
     
     setTodos([...todos, newTodo]);
-    setInputValue('');
   };
 
   const toggleFinish = useCallback((id) => {
@@ -145,8 +143,8 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4">
-      <div className="container mx-auto max-w-3xl flex flex-col items-center">
+    <div className="min-h-screen bg-gray-900 py-12 px-4 flex flex-col">
+      <div className="container mx-auto max-w-3xl flex flex-col items-center flex-grow">
         <Title todos={todos} />
         <TodoList 
           deleteTodo={deleteTodo} 
@@ -155,8 +153,12 @@ function App() {
         />
         <InputBox addTodo={addTodo} />
         <FinishList todos={todos} />
-        <p className="text-gray-500 mt-8">By kkjusdoit</p>
       </div>
+      <footer className="w-full mt-auto py-4">
+        <p className="text-gray-500 text-center">
+          &copy; {new Date().getFullYear()} kkjusdoit. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 }
