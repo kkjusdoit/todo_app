@@ -1,6 +1,5 @@
 import './App.css'
-import { useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import { useState, useCallback, useEffect } from 'react';
 
 // 常量提取
 const MESSAGES = {
@@ -108,16 +107,30 @@ function FinishList({ todos }) {
 }
 
 function App() {
-  const [todos, setTodos] = useState([]);
+  // 从 localStorage 读取初始数据，如果没有则使用空数组
+  const [todos, setTodos] = useState(() => {
+    const savedTodos = localStorage.getItem('todos');
+    return savedTodos ? JSON.parse(savedTodos) : [];
+  });
+  const [inputValue, setInputValue] = useState('');
 
-  const addTodo = useCallback((content) => {
+  // 当 todos 变化时，保存到 localStorage
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
+
+  const addTodo = (content) => {
+    if (content.trim() === '') return;
+    
     const newTodo = {
       id: Date.now(),
       content,
       isFinish: false,
     };
-    setTodos(prevTodos => [...prevTodos, newTodo]);
-  }, []);
+    
+    setTodos([...todos, newTodo]);
+    setInputValue('');
+  };
 
   const toggleFinish = useCallback((id) => {
     setTodos(prevTodos => 
