@@ -1,152 +1,143 @@
 import './App.css'
-import { useState } from 'react';
-function Title(props){
+import { useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
+
+// 常量提取
+const MESSAGES = {
+  EMPTY_INPUT: '请输入内容',
+  EMPTY_TODO: '请在下方输入待办事项',
+  EMPTY_FINISHED: '已完成的任务将显示在这里'
+};
+
+function Title({ todos }) {
   return (
-    <h1>Todo App : {props.todos.length}</h1>
+    <h1>Todo App : {todos.length}</h1>
   )
 }
 
-function TodoList(props){
-  let to_do_list = props.todos.filter((todo) => {
-    return !todo.isFinish; // 条件：返回true的项会被保留
-  });
+Title.propTypes = {
+  todos: PropTypes.array.isRequired
+};
 
-  const OnClickDeleteBtn = (id)=>{
-    console.log('on click delete ' + id)
-    props.deleteTodo(id);
-  }
-
-  const OnClickFinishBtn = (id) => {
-    console.log('on click finish ' + id)
-
-    props.toggleFinish(id)
-  }
-  to_do_list = to_do_list.map((todo) => {
-    return (
-      <li key = {todo.id}> 
-        <button onClick={() => OnClickDeleteBtn(todo.id)}>
-        Delete
+function TodoList({ todos, deleteTodo, toggleFinish }) {
+  const todoItems = todos.filter(todo => !todo.isFinish)
+    .map(todo => (
+      <li key={todo.id}> 
+        <button onClick={() => deleteTodo(todo.id)}>
+          Delete
         </button>
         {todo.content} 
-        <button onClick={() => OnClickFinishBtn(todo.id)}>
+        <button onClick={() => toggleFinish(todo.id)}>
           Finish
         </button>
       </li>
-    ) 
-  });
-  if (to_do_list.length === 0){
-    return(
-      <div>pls input your todo below</div>
-    )
-  }
-  return (
+    ));
+
+  return todoItems.length === 0 ? (
+    <div>{MESSAGES.EMPTY_TODO}</div>
+  ) : (
     <div>
-      <ol>{to_do_list}</ol>
+      <ol>{todoItems}</ol>
     </div>
-  )
+  );
 }
 
-function InputBox(props){
+TodoList.propTypes = {
+  todos: PropTypes.array.isRequired,
+  deleteTodo: PropTypes.func.isRequired,
+  toggleFinish: PropTypes.func.isRequired
+};
+
+function InputBox({ addTodo }) {
   const [inputValue, setInputValue] = useState("");
-  const OnClickBtn = () =>{
-    if (inputValue === ""){
-      console.log('pls input content');
+
+  const handleSubmit = () => {
+    if (!inputValue.trim()) {
+      console.log(MESSAGES.EMPTY_INPUT);
       return;
     }
-    console.log("before" + inputValue)
-    props.addTodo(inputValue);
-    setInputValue(""); //这行还是有必要的，input里还会有内容
-    console.log("after" + inputValue)
+    addTodo(inputValue.trim());
+    setInputValue("");
   };
 
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value)
-  };
   return (
     <div>
-      {<input type="text" value = {inputValue} onChange = {handleInputChange}/>}
-      <button onClick={OnClickBtn}>
+      <input 
+        type="text" 
+        value={inputValue} 
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+      />
+      <button onClick={handleSubmit}>
         Confirm
       </button>
     </div>
-
-  )
+  );
 }
 
-function FinishList(props){
-    const to_do_list = props.todos
-      .filter((todo) => todo.isFinish)
-      .map((todo) => {
-        return (
+InputBox.propTypes = {
+  addTodo: PropTypes.func.isRequired
+};
 
-          <li key = {todo.id}> 
-            <span style={{ textDecoration: "line-through" }}>{todo.content}</span>
-          </li>
-        )
-    });
-    if (to_do_list.length === 0){
-      return (
-        <div>your tasks be completed will show here</div>
-      )
-    }
-    return (
-      <div>
-        <ol>{to_do_list}</ol>
-      </div>
-    )
+function FinishList({ todos }) {
+  const finishedItems = todos
+    .filter(todo => todo.isFinish)
+    .map(todo => (
+      <li key={todo.id}> 
+        <span style={{ textDecoration: "line-through" }}>{todo.content}</span>
+      </li>
+    ));
+
+  return finishedItems.length === 0 ? (
+    <div>{MESSAGES.EMPTY_FINISHED}</div>
+  ) : (
+    <div>
+      <ol>{finishedItems}</ol>
+    </div>
+  );
 }
 
-
+FinishList.propTypes = {
+  todos: PropTypes.array.isRequired
+};
 
 function App() {
   const [todos, setTodos] = useState([]);
 
-  const addTodo = (content) => {
+  const addTodo = useCallback((content) => {
     const newTodo = {
+      id: Date.now(),
+      content,
+      isFinish: false,
+    };
+    setTodos(prevTodos => [...prevTodos, newTodo]);
+  }, []);
 
-      id : Date.now(),
-      content : content,
-      isFinish : false,
-    }
-    setTodos([... todos,newTodo]);
-  };
+  const toggleFinish = useCallback((id) => {
+    setTodos(prevTodos => 
+      prevTodos.map(todo => 
+        todo.id === id ? { ...todo, isFinish: !todo.isFinish } : todo
+      )
+    );
+  }, []);
 
-  const toggleFinish = (id) => {
-    const updateList = todos.map((todo) => {
-      if (todo.id === id){
-        return {...todo, isFinish:!todo.isFinish};
-      }
-      return todo;
-    })
-    setTodos(updateList);
-  }
-
-  const deleteTodo = (id) => {
-    const updatedList = todos.filter((todo) => todo.id !== id); // 直接过滤掉指定id的项
-    console.log("delete todo", updatedList.length); // 输出更新后的列表
-    setTodos(updatedList);
-  };
-
+  const deleteTodo = useCallback((id) => {
+    setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
+  }, []);
 
   return (
     <>
-    <Title todos = {todos}/>
-      <div>
-        <TodoList deleteTodo = {deleteTodo} toggleFinish = {toggleFinish} todos = {todos}/>
-
-      </div>
-      <div>
-        <InputBox addTodo={addTodo} />
-      </div>
-
-      <div>
-        <FinishList todos = {todos}/>
-      </div>
-      <p>
-        By kkjusdoit
-      </p>
+      <Title todos={todos} />
+      <TodoList 
+        deleteTodo={deleteTodo} 
+        toggleFinish={toggleFinish} 
+        todos={todos}
+      />
+      <InputBox addTodo={addTodo} />
+      <FinishList todos={todos} />
+      <p>By kkjusdoit</p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
