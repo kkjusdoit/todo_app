@@ -1,5 +1,5 @@
 import './App.css'
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, memo } from 'react';
 
 // 常量提取
 const MESSAGES = {
@@ -8,16 +8,16 @@ const MESSAGES = {
   EMPTY_FINISHED: '已完成的任务将显示在这里'
 };
 
-function Title({ todos }) {
+const Title = memo(function Title({ todos }) {
   const unfinishedTodos = todos.filter(todo => !todo.isFinish);
   return (
     <h1 className="text-4xl font-bold text-white mb-8">
       Todo List : {unfinishedTodos.length}
     </h1>
   )
-}
+});
 
-function TodoList({ todos, deleteTodo, toggleFinish }) {
+const TodoList = memo(function TodoList({ todos, deleteTodo, toggleFinish }) {
   const todoItems = todos.filter(todo => !todo.isFinish)
     .map((todo, index) => (
       <li key={todo.id} className="bg-gray-800 px-4 py-2 rounded-lg shadow-sm hover:shadow-lg transition-all" style={{display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', width: '100%', gap: '8px'}}>
@@ -53,9 +53,9 @@ function TodoList({ todos, deleteTodo, toggleFinish }) {
       <ol className="space-y-2 list-none">{todoItems}</ol>
     </div>
   );
-}
+});
 
-function InputBox({ addTodo }) {
+const InputBox = memo(({ addTodo }) => {
   const [inputValue, setInputValue] = useState("");
 
   const handleSubmit = () => {
@@ -86,9 +86,9 @@ function InputBox({ addTodo }) {
       </button>
     </div>
   );
-}
+});
 
-function FinishList({ todos }) {
+const FinishList = memo(({ todos }) => {
   const finishedItems = todos
     .filter(todo => todo.isFinish)
     .sort((a, b) => b.id - a.id)
@@ -106,9 +106,9 @@ function FinishList({ todos }) {
       <ol>{finishedItems}</ol>
     </div>
   );
-}
+});
 
-function App() {
+const App = () => {
   // 从 localStorage 读取初始数据，如果没有则使用空数组
   const [todos, setTodos] = useState(() => {
     const savedTodos = localStorage.getItem('todos');
@@ -163,6 +163,6 @@ function App() {
       </footer>
     </div>
   );
-}
+};
 
 export default App;
